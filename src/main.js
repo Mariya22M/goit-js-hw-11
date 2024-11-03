@@ -1,36 +1,20 @@
-// main.js
+import { ImageSearch } from './js/pixabay-api.js';
+import { renderGallery } from './js/render-functions.js'
 
-import { fetchImages } from './pixabay-api.js';
-import { renderGallery, clearGallery } from './render-functions.js';
-import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
-import iziToast from 'izitoast';
-import 'izitoast/dist/css/iziToast.min.css';
+const form = document.querySelector('form');
 
-const form = document.querySelector('#search-form');
-const loader = document.querySelector('.loader');
-let lightbox = new SimpleLightbox('.gallery a');
-let page = 1;
+const source = 'https://pixabay.com/api/?';
+const options = new URLSearchParams({
+	key: '46749030-b6cef6a6b69e043ecf4444c1b',
+	image_type: 'photo',
+	orientation: 'horizontal'
+});
 
-form.addEventListener('submit', async event => {
-  event.preventDefault();
+form.addEventListener('submit', (event) => {
+    event.preventDefault();
+	ImageSearch(source, options);
+});
 
-  const query = event.currentTarget.elements.searchQuery.value.trim();
-  if (!query) {
-    iziToast.error({ message: "Please enter a search term!" });
-    return;
-  }
-
-  clearGallery();
-  loader.classList.add('visible');
-
-  try {
-    const images = await fetchImages(query, page);
-    renderGallery(images);
-    lightbox.refresh();
-  } catch (error) {
-    iziToast.error({ message: "Sorry, no images were found. Try another search." });
-  } finally {
-    loader.classList.remove('visible');
-  }
+document.addEventListener('imagesFetched', (event) => {
+    renderGallery(event.detail);
 });
